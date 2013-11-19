@@ -1,4 +1,4 @@
-=== 56.com video upload plugin（56视频上传插件） ===
+=== 56.com video upload plugin（56.com视频上传插件） ===
 Contributors: 56.com(jiancheng.mai@renren-inc.com)
 Donate link: 
 Tags: 56,video
@@ -16,7 +16,7 @@ License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 == Installation ==
 
-1. Upload `open56` to the `/wp-content/plugins/` directory
+1. Upload `56com` to the `/wp-content/plugins/` directory
 1. Activate the plugin through the 'Plugins' menu in WordPress
 如您在使用该SDK上遇到任何问题，请联系Louis email:jianchen.mai@renren-inc.com QQ:837522080
 56网开放平台QQ群 233921452
