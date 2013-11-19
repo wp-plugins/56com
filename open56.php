@@ -12,8 +12,8 @@ Author URI: http://dev.56.com/
 Developer: Louis Li 
 License: GPLv2 or later
 */
-ini_set('display_errors',true);
-error_reporting(E_ALL & ~E_DEPRECATED);
+//ini_set('display_errors',true);
+//error_reporting(E_ALL & ~E_DEPRECATED);
 add_action('plugins_loaded', 'open56_load');
 function open56_load() {
 	if ( ! is_admin() )

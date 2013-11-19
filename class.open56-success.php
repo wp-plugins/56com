@@ -26,7 +26,7 @@ class open56_success{
 				<span class="alignright"><abbr id="status_img" title="required" class="required">*</abbr></span>
 			</th>
             <td class="field">
-                <input id="subject" name="subject" value="<?=isset($_GET['subject'])?$_GET['subject']:''?>" type="text">
+                <input id="subject" name="subject" value="<?=isset($_GET['subject'])?urldecode($_GET['subject']):''?>" type="text">
             </td>
 		</tr>
 		<tr>
@@ -58,7 +58,7 @@ function open56_insert() {
     if ( f.player.value ) {
         player = f.player.value;
     }
-    html = "<p>"+subject+"</p><embed src='"+player+"' type='application/x-shockwave-flash' allowFullScreen='true' width='100%' height='100%' allowNetworking='all' wmode='opaque' allowScriptAccess='always'></embed>";
+    html = "<p>"+subject+"</p><p style='height:400px;'><embed src='"+player+"' type='application/x-shockwave-flash' allowFullScreen='true' width='100%' height='100%' allowNetworking='all' wmode='opaque' allowScriptAccess='always'></embed></p>";
     parent.parent.send_to_editor(html);
     return false;
 }

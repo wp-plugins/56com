@@ -37,32 +37,52 @@ Open::Video_Hot($params);
 
 4.1、数据类：
     User_UserVideos //获取用户的上传的视频
-
+	
     User_UserProfile //获取用户的个人信息
-
+	
     User_UserComment //获得用户的评论或视频的评论
-
+	
     User_AppVideos //获取应用上传的视频
-
+	
     Video_GetVideoInfo //获取视频信息
-
+	
     Video_Search //根据关键字获取搜索结果
-
+	
     Video_Update //获取更新视频信息的接口
-
+	
     Video_Channel //获得频道的视频
-
+	
     Video_Recommend //获得推荐频道的视频
 
     Video_Hot //获得56网首页热门的视频
-
+	
     Video_RecAlbum //获得56网昨天或某天的推荐的相册视频
+
+    Video_Delete //删除视频
+
+    Album_Info // 视频专辑接口(新)
+
+    User_AppUserVideos //获取某应用下某用户的视频列表(新)
+
+    Video_Mobile // 手机客户端视频播放地址(新)
+
+    User_AppProfile	 //获取应用信息(新)
+
+    User_App2Videos	 获取当前应用上传视频列表(新)
+
+    Video_CustomPost //视频上传接口Post方式,56核心合作用户可用
+
+    Video_All //所有56视频列表 http://video.56.com/
+
+    Video_Opera //获取56自制剧集
 
 4.2、上传类：
 SDK/demo/plugin/
 ├── customEasy.php // 简易上传类，仅需提交视频即可
 ├── custom.php	// 定制上传类，可自定义上传框样式，上传视频同时需要填写标题、描述、标签
 └── upload.php  // 简陋上传类，上传视频同时需要填写标题、描述、标签
+└── diyupload.php  //自定义上传样式组件(加强版，可控标题等显示)(新) 
+└── CustomPost.php  //视频上传接口Post方式,56核心合作用户可用(新) 
 
 
 如您在使用该SDK上遇到任何问题，请联系Louis email:zixing.li@renren-inc.com QQ:838431609

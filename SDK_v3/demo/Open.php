@@ -37,7 +37,23 @@ if(function_exists('date_default_timezone_set')) {
 
     Video_Delete //删除视频
 
-    Album_Info // get album info
+    Album_Info // 视频专辑接口(新)
+
+    User_AppUserVideos //获取某应用下某用户的视频列表(新)
+
+    Video_Mobile // 手机客户端视频播放地址(新)
+
+    User_AppProfile	 //获取应用信息(新)
+
+    User_App2Videos	 //获取当前应用上传视频列表(新)
+
+    Video_CustomPost //视频上传接口Post方式,56核心合作用户可用
+
+    Video_All //所有56视频列表 http://video.56.com/
+
+    Video_Opera //获取56自制剧集
+
+    }
  * 
  * @final
  * @package SDK
@@ -48,20 +64,60 @@ final class Open
 {
     public static function Run()
     {
-        //self::User_UserVideos();
+        //print_r(self::User_UserVideos());
         //self::User_UserProfile();
         //print_r(self::User_AppVideos());
         //self::User_UserComment();
         //
-        //print_r(self::Video_GetVideoInfo());
-        //self::Video_Search();
-        //self::Video_Channel();
-        //self::Video_Recommend();
+        //print_r(self::User_AppUserVideos());
+        //print_r(self::User_App2Videos());
+        //print_r(self::User_AppProfile());
+        //print_r(self::Video_Mobile());
+        //var_dump(self::Video_GetVideoInfo());
+        //print_r(self::Video_Search());
+        //print_r(self::Video_Channel());
+        //print_r(self::Video_Recommend());
         //print_r(self::Video_Hot());
-        //self::Video_RecAlbum();
+        //print_r(self::Video_RecAlbum());
         //print_r(json_decode(self::Video_Update()));
         //print_r(self::Video_Delete());
         //print_r(self::Album_Info());
+        //var_dump(self::Video_CustomPost());
+        //print_r(self::Video_All());
+        //print_r(self::Video_Opera());
+    }
+
+    public static function Video_All(){
+        $conf = include dirname(dirname(__FILE__)).'/conf.php';
+        $params = array(
+            'type'=>'hot',
+            't'=>'week',
+            'c'=>'11',
+            'page'=>'29',
+            'rows'=>'2',
+        );  
+        return Open::GetApi('Video/All',$params);
+    }
+
+    public static function Video_Opera(){
+        $conf = include dirname(dirname(__FILE__)).'/conf.php';
+        $params = array(
+            'mid'=>'6268',
+        );  
+        return Open::GetApi('Video/Opera',$params);
+    }
+    public static function Video_CustomPost(){
+        $css='cDElM0RwMSUyNnAyJTNEcDIlMjZvbiUzRG9uJTI2b24lM0RvbiUyNm9uJTNEb24lMjZwbyUzRHBvJTI2bCUzRGNuJTI2YyUzRHA4JTI2aSUzRDE';
+        $sid = 'a_test_sid';
+        $rurl = '';
+        $ourl = '';
+        $params = array(
+            'sid'=>$sid,
+            'css'=>$css,
+            //'rurl'=>$rurl,
+            //'ourl'=>$ourl,
+        );  
+        return Open::GetPluginApi('Video/CustomPost',$params);
     }
 
     public static function Album_Info(){
@@ -109,9 +165,16 @@ final class Open
         return Open::GetApi('User/AppVideos',$params);
     }
 
-    public static function Video_GetVideoInfo(){
+    public static function Video_Mobile(){
         $params = array(
             'vid'=>'69971765',
+        );  
+        return Open::GetApi('Video/Mobile',$params);
+    }
+
+    public static function Video_GetVideoInfo(){
+        $params = array(
+            'vid'=>'79951371',
         );  
         return Open::GetApi('Video/GetVideoInfo',$params);
     }
@@ -142,9 +205,9 @@ final class Open
 
     public static function Video_Channel(){
         $params = array(
-            'cid'=>68,
-            'page'=>1,
-            'num'=>10,
+            'cid'=>3,
+            'page'=>3,
+            'num'=>1,
         );
         return Open::GetApi('Video/Channel',$params);
     }
@@ -153,7 +216,7 @@ final class Open
         $params = array(
             'mid'=>16,
             'page'=>1,
-            'num'=>10,
+            'num'=>1,
         );
         return Open::GetApi('Video/Recommend',$params);
     }
@@ -164,7 +227,7 @@ final class Open
             $params = array(
                 'cid'=>2,
                 'page'=>1,
-                'num'=>10,
+                'num'=>1,
             );
         return Open::GetApi('Video/Hot',$params);
     }
@@ -176,13 +239,35 @@ final class Open
         return Open::GetApi('Video/RecAlbum',$params);
     }
 
-    public static function Video_Delete(){
+    public static function Video_Delete( $params = array(), $conf = array() ){
+        $conf = ! empty( $conf ) ? $conf : include dirname(dirname(__FILE__)).'/conf.php';
+        $params = ! empty( $params ) ? $params : array( 'vid'=>'NzA2MjM4Mzc' );  
+        return Open::GetApi('Video/Delete',$params, $conf);
+    }
+
+    public static function User_AppUserVideos(){
         $conf = include dirname(dirname(__FILE__)).'/conf.php';
         $params = array(
-            'vid'=>'NzA2MjM4Mzc',
+            'sid'=>$conf['test_user_id'],
+            'page'=>1,
+            'rows'=>10,
         );  
-        return Open::GetApi('Video/Delete',$params);
+        return Open::GetApi('User/AppUserVideos',$params);
     }
+
+    public static function User_AppProfile(){
+        $conf = include dirname(dirname(__FILE__)).'/conf.php';
+        $params = array(
+        );  
+        return Open::GetApi('User/AppProfile',$params);
+    }
+
+     public static function User_App2Videos( $params = array(), $conf = array() ){
+        $conf = ! empty( $conf ) ? $conf : include dirname(dirname(__FILE__)).'/conf.php';  
+        $params = ! empty( $params ) ? $params : array( 'page'=>1,'rows'=>10 );  
+        return Open::GetApi('User/App2Videos', $params, $conf);
+    }
+
 
     /**
      * @name GetApi 
@@ -195,12 +280,15 @@ final class Open
      * @access public
      * @return array
      */
-    public static function GetApi($path = '',$params = array())
+    public static function GetApi($path = '',$params = array(),$conf=false)
     {
         require_once dirname(dirname(__FILE__)).'/'.$path.'.php';
         $className = (str_replace('/','_',$path));
         $class = new $className;
-        return json_decode($class->Get($params),true);
+        if($conf)
+            return json_decode($class->setConf($conf)->Get($params),true);
+        else
+            return json_decode($class->Get($params),true);
     }
 
     /**

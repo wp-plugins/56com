@@ -1,6 +1,4 @@
 <?php
-ini_set('display_errors',true);
-error_reporting(E_ALL & ~E_DEPRECATED);
 require_once 'SDK_v3/demo/Open.php';
 class open56{
 
@@ -9,8 +7,13 @@ class open56{
 	var $folder = '';
 
 	var $package = 'open56';
+	var $template = 'templates/';
 
 	var $name = '56视频上传';
+
+	var $action = 'media_video_list';
+	var $message = '';
+	var $vars = array();
 	
 	var $meets_guidelines = array(); // Internal use only.
 	
@@ -30,6 +33,10 @@ class open56{
 	}
 	
 	function admin_init() {
+		if ( isset( $_REQUEST['outiframe'] ) && $_REQUEST['outiframe'] == '1') {
+			$this->outiframe();
+			exit ;
+		}
 
 		if ( ! function_exists('submit_button') ) {
 			add_action('admin_notices', array(&$this, 'requires_32') );
@@ -42,7 +49,6 @@ class open56{
 		add_action('load-media_page_'.$this->package, array(&$this, 'add_styles') );
 		add_action('media_upload_open56', array(&$this, 'add_styles') );
 
-
 		if ( $this->user_allowed() ) {
 			//Add actions/filters
 			add_filter('media_upload_tabs', array(&$this, 'tabs'));
@@ -54,14 +60,34 @@ class open56{
 		register_setting('open56', 'open56_secrect');
 		register_setting('open56', 'frmsvr_uac_users');
 		register_setting('open56', 'frmsvr_uac_role');
-		
+
+		//Delete the video
+		if ( isset( $_REQUEST['action'] ) && $_REQUEST['action'] == 'delete') {
+			$vid = isset( $_REQUEST['post'] ) ? intval( $_REQUEST['post'] ) : '0' ;
+			$rs = $this->video_delete( $vid );
+			$this->message = isset( $rs['err']) ? $rs['err'] : '视频删除成功！视频列表有缓存，请10分钟之后再刷新列表查看';
+			add_action('admin_notices', array(&$this, 'video_message'));
+				
+		}
+
+		//Upload video callback
+		if ( isset( $_REQUEST['action'] ) && $_REQUEST['action'] == 'callback') {
+			$ok = isset( $_REQUEST['ok'] ) ? intval( $_REQUEST['ok'] ) : '0' ;
+			$this->message = $ok == 1 ? '视频上传成功！视频列表有缓存，请10分钟之后再刷新列表查看' : '视频上传失败！';
+			add_action('admin_notices', array(&$this, 'video_message'));
+				
+		}		
 	}
 	
 	function admin_menu() {
 		if ( ! function_exists('submit_button') )
 			return;
-        if ( $this->user_allowed() )
-            add_media_page( __('56视频上传', 'open56'), __('56视频上传', 'open56'), 'read', 'open56', array(&$this, 'menu_page') );
+        if ( $this->user_allowed() ) {
+        	if( isset( $_REQUEST['action'] ) && $_REQUEST['action'] == 'upload') {
+        		$this->action = 'video_upload';
+			}
+        }
+        add_media_page( __('56视频上传', 'open56'), __('56视频上传', 'open56'), 'read', 'open56', array(&$this, 'menu_page') );
         add_options_page( __('56视频上传 Settings', 'open56'), __('56视频上传', 'open56'), 'manage_options', 'open56-settings', array(&$this, 'options_page') );
     }
 
@@ -107,7 +133,7 @@ class open56{
             media_upload_header();
 
             //Do the content
-            $this->main_content();
+            $this->tab_video_list();
         }
 
 		//Do a footer
@@ -123,10 +149,10 @@ class open56{
 		echo '<h2>' . __($this->name, $this->package) . '</h2>';
 
 		//Do the content
-		$this->main_content();
-		
+		$this->action == 'media_video_list' ? $this->media_video_list() : $this->video_upload();
 		echo '</div>';
 	}
+
 
 	function options_page() {
 		if ( ! current_user_can('manage_options') )
@@ -140,9 +166,79 @@ class open56{
 	function user_allowed() {
         return true;
 	}
+
+	//Create the media video list page
+	function media_video_list( $from = '', $upload_url = '' ) {
+		$upload_url = 'upload.php?page=open56&action=upload';
+		$conf = array (
+	            'appkey'=>esc_attr(get_option('open56_appkey', '')),
+	            'secret'=>esc_attr(get_option('open56_secrect', '')),
+	            );
+		$params = array (
+				'page' => '1',
+				'rows' => '100'
+			);
+		$videoList = Open::User_app2videos( $params, $conf );
+		include_once $this->template . "tpl.MediaVideoList.php";
+	}
+
+	//Create the tab video list page
+	function tab_video_list() {
+		$conf = array (
+	            'appkey'=>esc_attr(get_option('open56_appkey', '')),
+	            'secret'=>esc_attr(get_option('open56_secrect', '')),
+	            );
+		$css='cDElM0RwMSUyNnAyJTNEcDIlMjZvbiUzRG9uJTI2b24lM0RvbiUyNm9uJTNEb24lMjZwbyUzRHBvJTI2bCUzRGNuJTI2YyUzRHAxMCUyNmklM0Qx';
+		$sid = 'a_test_sid';
+		$fields = 'title,content,tags';
+		$admin_url = admin_url();
+		$rurl = $admin_url.'media-upload.php?tab=open56';
+		$ourl = $admin_url.'media-upload.php?tab=open56';
+		$params = array(
+		    'fields'=>$fields,
+		    'sid'=>$sid,
+		    'css'=>$css,
+		    'rurl'=>$rurl,
+		    'ourl'=>$ourl,
+		);  
+		$method = "Video/Diyupload";
+		$upload_url = Open::GetPluginApi( $method,$params,$conf);
+		$params = array();
+		$params = array (
+				'page' => '1',
+				'rows' => '100'
+			);
+		$videoList = Open::User_app2videos( $params, $conf );
+		include_once $this->template . "tpl.TabVideoList.php";
+	}
 	
-	//Create the content for the page
-	function main_content() {
+	//Delete the video
+	function video_delete( $vid ) {
+		$vid = ! empty( $vid ) ? $vid : '0';
+		$conf = array (
+	            'appkey'=>esc_attr(get_option('open56_appkey', '')),
+	            'secret'=>esc_attr(get_option('open56_secrect', '')),
+	            );
+		$params = array( 'vid' => $vid);
+		return Open::Video_Delete( $params, $conf);
+	}
+
+	//Show the message
+	function video_message(){
+		echo '<div class="updated"><p>' . __( $this->message, $this->package ) . '</p></div>';
+	}
+
+	//Out of the iframe
+	function outiframe() {
+			echo "<script type=\"text/javascript\">";
+		   	echo "url = location.href;";
+			echo "url = url.replace(/&outiframe=1/g, '');";
+			echo "parent.parent.location.href = url;";
+			echo "</script>";
+	}
+
+	//Create the video_upload page
+	function video_upload() {
 		global $pagenow;
         $admin_url = admin_url();
         $conf = array(
@@ -161,8 +257,8 @@ $css='cDElM0RwMSUyNnAyJTNEcDIlMjZvbiUzRG9uJTI2b24lM0RvbiUyNm9uJTNEb24lMjZwbyUzRH
 $sid = 'a_test_sid';
 //$fields = 'title,content,tags';
 $fields = 'title,content,tags';
-$rurl = $admin_url.'media-upload.php?post_id=9&tab=open56';
-$ourl = $admin_url.'media-upload.php?post_id=9&tab=open56';
+$rurl = $admin_url.'upload.php?page=open56&outiframe=1&action=callback&ok=0';
+$ourl = $admin_url.'upload.php?page=open56&outiframe=1&action=callback&ok=1';
 $params = array(
     'fields'=>$fields,
     'sid'=>$sid,
@@ -173,7 +269,7 @@ $params = array(
 ?>
 <center>
 <div style="padding-top:20px">
-<iframe scrolling="no" frameborder="0" src="<?php echo Open::GetPluginApi('Video/Diyupload',$params,$conf);?>" name="open56" id="open56" style="height:428px; width:600px;"></iframe>
+<iframe scrolling="no" frameborder="0" src="<?php echo Open::GetPluginApi( 'Video/Diyupload',$params,$conf);?>" name="open56" id="open56" style="height:428px; width:600px;"></iframe>
 </div>
 </center>
 <?php

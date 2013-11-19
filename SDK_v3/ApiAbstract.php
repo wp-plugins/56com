@@ -120,6 +120,10 @@ abstract class ApiAbstract{
 	*/
 	public function httpCall($url ,$params = '',$method = 'get', $connectTimeout = self::CONNECT_TIMEOUT,$readTimeout = self::READ_TIMEOUT) {
 
+        if ($this->conf['print_request_params']) {
+            var_dump('url:'.$url,'params:'.$params);
+        }
+
 		$result = "";
 		if (function_exists('curl_init')) {
 			$timeout = $connectTimeout + $readTimeout;
@@ -160,6 +164,9 @@ abstract class ApiAbstract{
 	* @return void
 	*/
 	public function signRequest($params){
+        if ($this->conf['print_request_params']) {
+            var_dump($params);
+        }
         if(isset($params['useToken']) && $params['useToken']){
 			$params['access_token']=$this->access_token;
 		}
